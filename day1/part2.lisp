@@ -8,9 +8,10 @@
 (defvar *config* (read-config "input"))
 
 (defun find-repeated-freq (&optional (config *config*))
-  (let ((config-len (length config)))
+  (let ((config-len (length config))
+        (totals (make-hash-table)))
     (loop for ind = 0 then (mod (+ ind 1) config-len)
           summing (nth ind config) into current-total
-          when (member current-total totals)
+          when (gethash current-total totals)
             return current-total
-          collect current-total into totals)))
+          do (setf (gethash current-total totals) current-total))))
