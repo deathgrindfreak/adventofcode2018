@@ -10,16 +10,16 @@
     (= (+ (min inta intb) 32) (max inta intb))))
 
 (defun simplify-polymer-helper (polymer processed)
-  (if polymer
-      (cond ((and (consp processed)
-                  (oppositepolarityp (first polymer) (first processed)))
-             (simplify-polymer-helper (cdr polymer) (cdr processed)))
-            ((and (consp polymer) (consp (cdr polymer))
-                  (oppositepolarityp (first polymer) (second polymer)))
-             (simplify-polymer-helper (cddr polymer) processed))
-            (t (destructuring-bind (head . rest) polymer
-                 (simplify-polymer-helper rest (cons head processed)))))
-      processed))
+  (cond ((null polymer) processed)
+        ((and (consp processed)
+              (oppositepolarityp (first polymer) (first processed)))
+         (simplify-polymer-helper (cdr polymer) (cdr processed)))
+        ((and (consp polymer)
+              (consp (cdr polymer))
+              (oppositepolarityp (first polymer) (second polymer)))
+         (simplify-polymer-helper (cddr polymer) processed))
+        (t (destructuring-bind (head . rest) polymer
+             (simplify-polymer-helper rest (cons head processed))))))
 
 (defun simplify-polymer (&optional (polymer (coerce *polymer* 'list)))
   (coerce (reverse (simplify-polymer-helper polymer nil)) 'string))
