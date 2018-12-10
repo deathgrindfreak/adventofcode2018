@@ -6,10 +6,13 @@
 
 (defvar *nodes* (read-nodes "input"))
 
+(defun make-sum-list (sum num-metadata rest)
+  (list (apply #'+ (cons sum (subseq rest 0 num-metadata)))
+        (subseq rest num-metadata)))
+
 (defun add-metadata-entries-help (heap sum)
   (destructuring-bind (num-children num-metadata . rest) heap
-    (cond ((zerop num-children) (list (apply #'+ (cons sum (subseq rest 0 num-metadata)))
-                                      (subseq rest num-metadata)))
+    (cond ((zerop num-children) (make-sum-list sum num-metadata rest))
           (t (let ((child-sums (loop repeat num-children
                                      with running-rest = rest
                                      with running-sum = sum
@@ -17,9 +20,7 @@
                                      do (setf running-sum (first child)
                                               running-rest (second child))
                                      finally (return (list running-sum running-rest)))))
-               (list (apply #'+ (cons (first child-sums)
-                                      (subseq (second child-sums) 0 num-metadata)))
-                     (subseq (second child-sums) num-metadata)))))))
+               (make-sum-list (first child-sums) num-metadata (second child-sums)))))))
 
 (defun add-metadata-entries (&optional (heap *nodes*))
   (first (add-metadata-entries-help heap 0)))
